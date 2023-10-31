@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-dep
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 15
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: flask-app
+  template:
+    metadata:
+      labels:
+        app: flask-app
+    spec:
+      containers:
+        - name: flask-cont
+          image: thoratshubham/portfolio-db-redis
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-config
+                  key: db-url
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-config
+                  key: db-port
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-config
+                  key: db-name
+            - name: DB_TABLE
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-config
+                  key: table
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds
+                  key: password
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "0.5"
+            requests:
+              memory: "256Mi"
+              cpu: "0.2"

@@ -1,0 +1,7 @@
+FROM python
+WORKDIR /usr/src/app
+EXPOSE 8000
+COPY . .
+RUN pip install Flask
+RUN pip install redis
+CMD ["python3","app.py"]

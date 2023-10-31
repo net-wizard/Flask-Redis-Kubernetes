@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-dep
+spec:
+  selector:
+    matchLabels:
+      app: redis-app
+  template:
+    metadata:
+      labels:
+        app: redis-app
+    spec:
+      containers:
+        - name: redis-cont
+          image: redis
+          command:
+            - "redis-server"
+          args:
+              - "--requirepass"
+              - "$(DB_PASS)"
+          # volumeMounts:
+          #   - mountPath: /etc/
+          #     name: redis-conf
+          ports:
+            - containerPort: 6379
+          env:
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds
+                  key: password
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "0.5"
+            requests:
+              memory: "256Mi"
+              cpu: "0.2"
+      # volumes:
+      #   - name: redis-conf
+      #     configMap:
+      #       name: redis-config
+      #       items:
+      #         - key: redis-data
+      #           path: redis.conf
